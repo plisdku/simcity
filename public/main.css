@@ -1,0 +1,30 @@
+/* Reset */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+}
+
+body {
+  background-color: black;
+}
+
+#root-window {
+  position: absolute;
+  background-color: red;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+#render-target {
+  position: relative;
+  /* margin: 100px; */
+  width: 100%;
+  height: 100%;
+  background-color: aqua;
+}
