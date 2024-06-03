@@ -15,3 +15,5 @@ npx vite
 ```
 
 Also I made a repo on GitHub for this. Huzzah.
+
+Learned about the camera's "up" setting. The default up vector is the y axis, I guess. I set it to be z by default because I like z to be up.

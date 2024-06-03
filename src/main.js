@@ -9,4 +9,8 @@ window.onload = () => {
   scene.start();
 
   console.log("Window loaded, scene started.");
+
+  document.addEventListener("mousedown", scene.onMouseDown, false);
+  document.addEventListener("mouseup", scene.onMouseUp, false);
+  document.addEventListener("mousemove", scene.onMouseMove, false);
 };
