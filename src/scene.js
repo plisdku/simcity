@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 import { createCamera } from "./camera";
+import { Resizer } from "./resizer";
 
 export function createScene() {
   const gameWindow = document.getElementById("render-target");
@@ -14,6 +15,8 @@ export function createScene() {
   const renderer = new THREE.WebGLRenderer();
   renderer.setSize(gameWindow.offsetWidth, gameWindow.offsetHeight);
   gameWindow.appendChild(renderer.domElement); // the domElement is a canvas element
+
+  const resizer = new Resizer(gameWindow, camera.camera, renderer);
 
   const boxMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
   const simpleBox = new THREE.BoxGeometry(1.0, 1.0, 1.0);
