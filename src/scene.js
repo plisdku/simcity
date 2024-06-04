@@ -45,15 +45,20 @@ export function createScene() {
   }
 
   function onMouseDown(event) {
-    camera.onMouseDown();
+    camera.onMouseDown(event);
   }
 
   function onMouseUp(event) {
-    camera.onMouseUp();
+    camera.onMouseUp(event);
   }
 
   function onMouseMove(event) {
     camera.onMouseMove(event);
+  }
+
+  function onWheel(event) {
+    console.log("WHAT");
+    camera.onWheel(event);
   }
 
   return {

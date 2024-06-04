@@ -13,4 +13,18 @@ window.onload = () => {
   document.addEventListener("mousedown", scene.onMouseDown, false);
   document.addEventListener("mouseup", scene.onMouseUp, false);
   document.addEventListener("mousemove", scene.onMouseMove, false);
+  // document.addEventListener("mousewheel", scene.onWheel, false);
+
+  document.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+  });
+
+  // function zoom(e) {
+  //   console.log(e.scale);
+  //   e.preventDefault();
+  // }
+  // console.log("EVENTS");
+  // document.addEventListener("gesturestart", zoom);
+  // document.addEventListener("gesturechange", zoom);
+  // document.addEventListener("gestureend", zoom);
 };
