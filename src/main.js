@@ -13,7 +13,7 @@ window.onload = () => {
   document.addEventListener("mousedown", scene.onMouseDown, false);
   document.addEventListener("mouseup", scene.onMouseUp, false);
   document.addEventListener("mousemove", scene.onMouseMove, false);
-  // document.addEventListener("mousewheel", scene.onWheel, false);
+  document.addEventListener("wheel", scene.onWheel, false);
 
   document.addEventListener("contextmenu", (e) => {
     e.preventDefault();

@@ -116,6 +116,9 @@ export function createCamera(gameWindow) {
   }
 
   function onWheel(event) {
+    cameraRadius -= 0.01 * event.wheelDelta;
+    cameraRadius = Math.max(2, cameraRadius);
+    updatePosition();
     console.log("Wheel:", event.wheelDelta);
   }
 

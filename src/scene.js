@@ -70,5 +70,6 @@ export function createScene() {
     onMouseDown,
     onMouseUp,
     onMouseMove,
+    onWheel,
   };
 }
