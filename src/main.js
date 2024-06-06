@@ -1,11 +1,13 @@
+import { createCity } from "./city";
 import { createScene } from "./scene";
 
 console.log("Hello, World!");
 
-let scene;
-
 window.onload = () => {
-  scene = createScene();
+  const scene = createScene();
+  const city = createCity(8);
+  scene.initialize(city);
+  scene.setupLights();
   scene.start();
 
   console.log("Window loaded, scene started.");

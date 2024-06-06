@@ -4,6 +4,10 @@ import { transformedBitangentWorld } from "three/examples/jsm/nodes/Nodes.js";
 const DEG2RAD = Math.PI / 180.0;
 const RAD2DEG = 1 / DEG2RAD;
 
+const INITIAL_AZIMUTH = 30 * DEG2RAD;
+const INITIAL_ELEVATION = 30 * DEG2RAD;
+const INITIAL_RADIUS = 25;
+
 const LEFT_MOUSE_BUTTON = 0;
 const RIGHT_MOUSE_BUTTON = 1;
 
@@ -15,9 +19,9 @@ export function createCamera(gameWindow) {
     1000
   );
 
-  let cameraRadius = 10;
-  let cameraAzimuth_rad = 0;
-  let cameraElevation_rad = 0;
+  let cameraRadius = INITIAL_RADIUS;
+  let cameraAzimuth_rad = INITIAL_AZIMUTH;
+  let cameraElevation_rad = INITIAL_ELEVATION;
   let cameraLookAt = new THREE.Vector3(0, 0, 0);
 
   // Math.PI / 10;
@@ -56,8 +60,8 @@ export function createCamera(gameWindow) {
   function onMouseDown(event) {
     // console.log(event);
 
-    console.log("DOWN button ", event.button);
-    console.log(event);
+    // console.log("DOWN button ", event.button);
+    // console.log(event);
 
     if (event.button == RIGHT_MOUSE_BUTTON || event.ctrlKey) {
       isRightMouseDown = true;
@@ -119,7 +123,6 @@ export function createCamera(gameWindow) {
     cameraRadius -= 0.01 * event.wheelDelta;
     cameraRadius = Math.max(2, cameraRadius);
     updatePosition();
-    console.log("Wheel:", event.wheelDelta);
   }
 
   return {
