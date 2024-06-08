@@ -3,9 +3,9 @@ import { createScene } from "./scene";
 
 console.log("Hello, World!");
 
-window.onload = () => {
+function createGame() {
   const scene = createScene();
-  const city = createCity(8);
+  const city = createCity(20);
   scene.initialize(city);
   scene.setupLights();
   scene.start();
@@ -21,6 +21,19 @@ window.onload = () => {
     e.preventDefault();
   });
 
+  const game = {
+    update() {
+      console.log("Update");
+      city.update();
+      scene.update(city);
+    },
+  };
+  setInterval(() => {
+    game.update();
+  }, 1000);
+
+  // game.update();
+
   // function zoom(e) {
   //   console.log(e.scale);
   //   e.preventDefault();
@@ -29,4 +42,10 @@ window.onload = () => {
   // document.addEventListener("gesturestart", zoom);
   // document.addEventListener("gesturechange", zoom);
   // document.addEventListener("gestureend", zoom);
+
+  return game;
+}
+
+window.onload = () => {
+  window.game = createGame();
 };

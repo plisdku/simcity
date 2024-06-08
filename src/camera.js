@@ -97,20 +97,20 @@ export function createCamera(gameWindow) {
         const right = 3e-2 * delta.x;
         const fwd = 3e-2 * delta.y;
 
-        console.log(`Delta ${delta.x}, ${delta.y}; Right ${right}, fwd ${fwd}`);
+        // console.log(`Delta ${delta.x}, ${delta.y}; Right ${right}, fwd ${fwd}`);
 
         const sin = Math.sin(cameraAzimuth_rad);
         const cos = Math.cos(cameraAzimuth_rad);
 
-        console.log(`sin ${sin} cos ${cos}`);
+        // console.log(`sin ${sin} cos ${cos}`);
 
         let wd = new THREE.Vector3();
         camera.getWorldDirection(wd);
-        console.log(wd);
+        // console.log(wd);
 
         const dx = sin * right + fwd * wd.x;
         const dy = -cos * right + fwd * wd.y;
-        console.log(`dx = ${dx}, dy = ${dy}`);
+        // console.log(`dx = ${dx}, dy = ${dy}`);
         cameraLookAt.x += dx;
         cameraLookAt.y += dy;
         updatePosition();

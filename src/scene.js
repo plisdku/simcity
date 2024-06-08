@@ -2,6 +2,7 @@ import * as THREE from "three";
 
 import { createCamera } from "./camera";
 import { Resizer } from "./resizer";
+import { createAssetInstance } from "./assets";
 
 export function createScene() {
   const gameWindow = document.getElementById("render-target");
@@ -26,52 +27,60 @@ export function createScene() {
 
   let rotAngle = 0;
 
-  let meshes = [];
+  let terrain = [];
+  let buildings = [];
 
   function initialize(city) {
     scene.clear();
-    meshes = [];
+    terrain = [];
+    buildings = [];
 
     for (let x = 0; x < city.size; x += 1) {
       const column = [];
       for (let y = 0; y < city.size; y += 1) {
-        // 1. load mesh/3d object corresponding to the tile at x,y
-        // 2. add that mesh to the scene
-        // 3. add that mesh to the meshes array
-
-        // Grass geometry
-        // const boxMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const boxMaterial = new THREE.MeshLambertMaterial({ color: 0x00aa00 });
-        const simpleBox = new THREE.BoxGeometry(1.0, 1.0, 1.0);
-        const mesh = new THREE.Mesh(simpleBox, boxMaterial);
-        mesh.position.set(x, y, -0.5);
+        const terrainId = city.data[x][y].terrainId;
+        const mesh = createAssetInstance(terrainId, x, y);
         column.push(mesh);
         scene.add(mesh);
+      }
+      terrain.push(column);
+      buildings.push([...Array(city.size)]); // column of undefined values
+    }
+  }
 
-        // Building geometry
+  function update(city) {
+    // console.log("Update", city);
+    for (let x = 0; x < city.size; x += 1) {
+      const column = [];
+      for (let y = 0; y < city.size; y += 1) {
+        const currentBuildingId = buildings[x][y]?.userData.id;
+        const newBuildingId = city.data[x][y].buildingId;
 
-        const tile = city.data[x][y];
-        if (tile.building == "building") {
-          const buildingMaterial = new THREE.MeshLambertMaterial({
-            color: 0x777777,
-          });
-          const buildingBox = new THREE.BoxGeometry(1.0, 1.0, 1.0);
-          const buildingMesh = new THREE.Mesh(buildingBox, buildingMaterial);
-          buildingMesh.position.set(x, y, 0.5);
-          column.push(buildingMesh);
-          scene.add(buildingMesh);
+        // If the player removes a building, remove it from the scene
+        if (!newBuildingId && currentBuildingId) {
+          scene.remove(buildings[x][y]);
+          buildings[x][y] = undefined;
+        }
+
+        // If the data model has changed
+        if (newBuildingId !== currentBuildingId) {
+          scene.remove(buildings[x][y]);
+          const mesh = createAssetInstance(newBuildingId, x, y);
+
+          // console.log(mesh.position, mesh.scale);
+          buildings[x][y] = mesh;
+          scene.add(mesh);
         }
       }
-      meshes.push(column);
     }
   }
 
   function setupLights() {
     const lights = [
       new THREE.AmbientLight(0xffffff, 0.2),
+      new THREE.DirectionalLight(0xffffff, 0.6),
       new THREE.DirectionalLight(0xffffff, 0.3),
-      new THREE.DirectionalLight(0xffffff, 0.3),
-      new THREE.DirectionalLight(0xffffff, 0.3),
+      new THREE.DirectionalLight(0xffffff, 0.9),
     ];
 
     lights[1].position.set(0, 0, 10);
@@ -123,5 +132,6 @@ export function createScene() {
     onWheel,
     initialize,
     setupLights,
+    update,
   };
 }
