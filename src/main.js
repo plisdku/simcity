@@ -8,14 +8,23 @@ function createGame() {
   const city = createCity(20);
   scene.initialize(city);
   scene.setupLights();
+  scene.onObjectSelected = (selectedObject) => {
+    console.log("Selected", selectedObject);
+
+    let { x, y } = selectedObject.userData;
+    const tile = city.data[x][y];
+    console.log(tile);
+  }
+
+  console.log("oos:", scene.onObjectSelected)
   scene.start();
 
   console.log("Window loaded, scene started.");
 
-  document.addEventListener("mousedown", scene.onMouseDown, false);
-  document.addEventListener("mouseup", scene.onMouseUp, false);
-  document.addEventListener("mousemove", scene.onMouseMove, false);
-  document.addEventListener("wheel", scene.onWheel, false);
+  document.addEventListener("mousedown", scene.onMouseDown.bind(scene), false);
+  document.addEventListener("mouseup", scene.onMouseUp.bind(scene), false);
+  document.addEventListener("mousemove", scene.onMouseMove.bind(scene), false);
+  document.addEventListener("wheel", scene.onWheel.bind(scene), false);
 
   document.addEventListener("contextmenu", (e) => {
     e.preventDefault();
@@ -23,7 +32,7 @@ function createGame() {
 
   const game = {
     update() {
-      console.log("Update");
+      // console.log("Update");
       city.update();
       scene.update(city);
     },

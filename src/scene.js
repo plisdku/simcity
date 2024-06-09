@@ -19,14 +19,12 @@ export function createScene() {
 
   const resizer = new Resizer(gameWindow, camera.camera, renderer);
 
-  const floor = new THREE.BoxGeometry(10, 10, 0.1);
-  const floorMaterial = new THREE.MeshBasicMaterial({ color: 0x223322 });
-  const floorMesh = new THREE.Mesh(floor, floorMaterial);
-
-  scene.add(floorMesh);
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  let selectedObject = undefined;
+  let onObjectSelected = undefined;
 
   let rotAngle = 0;
-
   let terrain = [];
   let buildings = [];
 
@@ -109,6 +107,29 @@ export function createScene() {
 
   function onMouseDown(event) {
     camera.onMouseDown(event);
+
+    mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+    mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera.camera);
+
+    let intersections = raycaster.intersectObjects(scene.children, false);
+
+    if (selectedObject) {
+      selectedObject.material.emissive.setHex(0);
+    }
+
+    if (intersections.length > 0) {
+      selectedObject = intersections[0].object;
+      selectedObject.material.emissive.setHex(0x555555);
+
+      // console.log("User data", selectedObject.userData)
+      // console.log(`Tile ${selectedObject.userData.x}, ${selectedObject.userData.y}`);
+
+      if (this.onObjectSelected) {
+        this.onObjectSelected(selectedObject)
+      }
+    }
   }
 
   function onMouseUp(event) {
@@ -133,5 +154,6 @@ export function createScene() {
     initialize,
     setupLights,
     update,
+    onObjectSelected
   };
 }
