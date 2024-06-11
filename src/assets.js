@@ -17,34 +17,44 @@ const assets = {
     mesh.position.set(x, y, 0.5);
     return mesh;
   },
-  "building-1": (x, y) => {
+  residential: (x, y) => {
     const buildingMaterial = new THREE.MeshLambertMaterial({
       color: 0xee7777,
     });
     const mesh = new THREE.Mesh(simpleBox, buildingMaterial);
-    mesh.userData = { id: "building-1", x, y };
+    mesh.userData = { id: "residential", x, y };
     mesh.scale.set(1, 1, 1);
     mesh.position.set(x, y, 1.5);
     return mesh;
   },
-  "building-2": (x, y) => {
+  commercial: (x, y) => {
     const buildingMaterial = new THREE.MeshLambertMaterial({
       color: 0x77ee77,
     });
     const mesh = new THREE.Mesh(simpleBox, buildingMaterial);
-    mesh.userData = { id: "building-2", x, y };
+    mesh.userData = { id: "commercial", x, y };
     mesh.scale.set(1, 1, 2);
     mesh.position.set(x, y, 2);
     return mesh;
   },
-  "building-3": (x, y) => {
+  industrial: (x, y) => {
     const buildingMaterial = new THREE.MeshLambertMaterial({
       color: 0x7777ee,
     });
     const mesh = new THREE.Mesh(simpleBox, buildingMaterial);
-    mesh.userData = { id: "building-3", x, y };
+    mesh.userData = { id: "industrial", x, y };
     mesh.scale.set(1, 1, 3);
     mesh.position.set(x, y, 2.5);
+    return mesh;
+  },
+  road: (x, y) => {
+    const buildingMaterial = new THREE.MeshLambertMaterial({
+      color: 0x222222,
+    });
+    const mesh = new THREE.Mesh(simpleBox, buildingMaterial);
+    mesh.userData = { id: "road", x, y };
+    mesh.scale.set(1, 1, 0.1);
+    mesh.position.set(x, y, 1.05);
     return mesh;
   },
 };

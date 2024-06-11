@@ -27,15 +27,17 @@ export function createCity(size) {
       buildingId: undefined,
       update() {
         const r = Math.random();
-        if (r < 0.01) {
+        if (r < 0.001) {
           // console.log(`Building[${x}, ${y}] = ${this.buildingId}`);
           if (this.buildingId === undefined) {
-            this.buildingId = "building-1";
-          } else if (this.buildingId === "building-1") {
-            this.buildingId = "building-2";
-          } else if (this.buildingId === "building-2") {
-            this.buildingId = "building-3";
-          } else if (this.buildingId === "building-3") {
+            this.buildingId = "road";
+          } else if (this.buildingId === "road") {  
+            this.buildingId = "residential";
+          } else if (this.buildingId === "residential") {
+            this.buildingId = "commercial";
+          } else if (this.buildingId === "commercial") {
+            this.buildingId = "industrial";
+          } else if (this.buildingId === "industrial") {
             this.buildingId = undefined;
           }
         }

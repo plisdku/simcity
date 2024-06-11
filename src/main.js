@@ -24,11 +24,13 @@ function createGame() {
       // place building at that location
       let b = undefined;
       if (activeToolId === "residential") {
-        b = "building-1";
+        b = "residential";
       } else if (activeToolId === "commercial") {
-        b = "building-2";
+        b = "commercial";
       } else if (activeToolId === "industrial") {
-        b = "building-3";
+        b = "industrial";
+      } else if (activeToolId === "road") {
+        b = "road";
       }
       if (b) {
         city.data[x][y].buildingId = b;
