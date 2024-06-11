@@ -6,17 +6,39 @@ console.log("Hello, World!");
 function createGame() {
   const scene = createScene();
   const city = createCity(20);
+  let activeToolId = "bulldoze";
+
   scene.initialize(city);
   scene.setupLights();
   scene.onObjectSelected = (selectedObject) => {
-    console.log("Selected", selectedObject);
+    // console.log("Selected", selectedObject);
 
     let { x, y } = selectedObject.userData;
     const tile = city.data[x][y];
-    console.log(tile);
+    // console.log(tile);
+
+    if (activeToolId === "bulldoze") {
+      // remove building at that location
+      city.data[x][y].buildingId = undefined;
+    } else if (!tile.buildindId) {
+      // place building at that location
+      let b = undefined;
+      if (activeToolId === "residential") {
+        b = "building-1";
+      } else if (activeToolId === "commercial") {
+        b = "building-2";
+      } else if (activeToolId === "industrial") {
+        b = "building-3";
+      }
+      if (b) {
+        city.data[x][y].buildingId = b;
+      }
+    }
+    city.update();
+    scene.update(city);
   }
 
-  console.log("oos:", scene.onObjectSelected)
+  // console.log("oos:", scene.onObjectSelected)
   scene.start();
 
   console.log("Window loaded, scene started.");
@@ -36,6 +58,9 @@ function createGame() {
       city.update();
       scene.update(city);
     },
+    setActiveToolId(toolId) {
+      activeToolId = toolId;
+    }
   };
   setInterval(() => {
     game.update();
@@ -58,3 +83,15 @@ function createGame() {
 window.onload = () => {
   window.game = createGame();
 };
+
+let selectedControl = document.getElementById("button-bulldoze");
+// console.log("Selected:", selectedControl)
+window.setActiveTool = (event, id) => {
+  // console.log("Set active:", event, id)
+  if (selectedControl) {
+    selectedControl.classList.remove("selected");
+  }
+  selectedControl = event.target;
+  selectedControl.classList.add("selected");
+  window.game.setActiveToolId(id);
+}

@@ -9,7 +9,15 @@
   </head>
   <body>
     <div id="root-window">
-      <div id="render-target"></div>
+      <div id="render-target">
+        <div id="ui-toolbar">
+          <button id="button-bulldoze" class="ui-button selected" onclick="setActiveTool(event, 'bulldoze')">Bulldoze</button>
+          <button id="button-residential" class="ui-button" onclick="setActiveTool(event, 'residential')">Residential</button>
+          <button id="button-commercial" class="ui-button" onclick="setActiveTool(event, 'commercial')">Commercial</button>
+          <button id="button-industrial" class="ui-button" onclick="setActiveTool(event, 'industrial')">Industrial</button>
+          <button id="button-roads" class="ui-button" onclick="setActiveTool(event, 'roads')">Roads</button>
+        </div>
+      </div>
     </div>
   </body>
 </html>

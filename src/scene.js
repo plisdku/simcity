@@ -38,6 +38,9 @@ export function createScene() {
       for (let y = 0; y < city.size; y += 1) {
         const terrainId = city.data[x][y].terrainId;
         const mesh = createAssetInstance(terrainId, x, y);
+        if (mesh === undefined) {
+          console.log("UNDEFINED: ", terrainId, x, y);
+        }
         column.push(mesh);
         scene.add(mesh);
       }
@@ -61,10 +64,13 @@ export function createScene() {
         }
 
         // If the data model has changed
-        if (newBuildingId !== currentBuildingId) {
+        if (newBuildingId && newBuildingId !== currentBuildingId) {
           scene.remove(buildings[x][y]);
           const mesh = createAssetInstance(newBuildingId, x, y);
 
+          if (!mesh) {
+            console.log("MASH", newBuildingId);
+          }
           // console.log(mesh.position, mesh.scale);
           buildings[x][y] = mesh;
           scene.add(mesh);

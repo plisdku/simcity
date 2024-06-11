@@ -28,3 +28,19 @@ body {
   height: 100%;
   background-color: aqua;
 }
+
+#ui-toolbar {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top: 50%;
+  transform: translateY(-50%)
+}
+
+.ui-button {
+  padding: 10px;
+}
+.ui-button.selected {
+  padding: 10px;
+  border: 2px solid red;
+}
