@@ -24,7 +24,7 @@ export function createCity(size) {
       x,
       y,
       terrainId: "grass",
-      buildingId: undefined,
+      building: undefined,
       update() {
         const r = Math.random();
         if (r < 0.001) {
@@ -49,7 +49,7 @@ export function createCity(size) {
   function update() {
     for (let x = 0; x < size; x += 1) {
       for (let y = 0; y < size; y += 1) {
-        data[x][y].update();
+        data[x][y].building?.update();
       }
     }
   }

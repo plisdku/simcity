@@ -1,5 +1,6 @@
 import { createCity } from "./city";
 import { createScene } from "./scene";
+import buildingFactory from "./buildings";
 
 const CITY_SIZE = 20;
 
@@ -21,22 +22,10 @@ function createGame() {
 
     if (activeToolId === "bulldoze") {
       // remove building at that location
-      city.data[x][y].buildingId = undefined;
-    } else if (!tile.buildindId) {
+      city.data[x][y].building = undefined;
+    } else if (!tile.buildind) {
       // place building at that location
-      let b = undefined;
-      if (activeToolId === "residential") {
-        b = "residential";
-      } else if (activeToolId === "commercial") {
-        b = "commercial";
-      } else if (activeToolId === "industrial") {
-        b = "industrial";
-      } else if (activeToolId === "road") {
-        b = "road";
-      }
-      if (b) {
-        city.data[x][y].buildingId = b;
-      }
+      city.data[x][y].building = buildingFactory[activeToolId]();
     }
     city.update();
     scene.update(city);
