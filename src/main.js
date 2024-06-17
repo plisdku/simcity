@@ -1,11 +1,13 @@
 import { createCity } from "./city";
 import { createScene } from "./scene";
 
+const CITY_SIZE = 20;
+
 console.log("Hello, World!");
 
 function createGame() {
   const scene = createScene();
-  const city = createCity(20);
+  const city = createCity(CITY_SIZE);
   let activeToolId = "bulldoze";
 
   scene.initialize(city);

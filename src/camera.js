@@ -4,6 +4,8 @@ import { transformedBitangentWorld } from "three/examples/jsm/nodes/Nodes.js";
 const DEG2RAD = Math.PI / 180.0;
 const RAD2DEG = 1 / DEG2RAD;
 
+const FOV_DEG = 35;
+
 const INITIAL_AZIMUTH = 30 * DEG2RAD;
 const INITIAL_ELEVATION = 30 * DEG2RAD;
 const INITIAL_RADIUS = 25;
@@ -13,7 +15,7 @@ const RIGHT_MOUSE_BUTTON = 1;
 
 export function createCamera(gameWindow) {
   const camera = new THREE.PerspectiveCamera(
-    35,
+    FOV_DEG,
     gameWindow.offsetWidth / gameWindow.offsetHeight,
     0.1,
     1000
@@ -83,10 +85,15 @@ export function createCamera(gameWindow) {
     if (prevMousePosition === null) {
     } else {
       const delta = curMousePosition.clone().sub(prevMousePosition);
+      
+      const degPerPixel = 5 * FOV_DEG / gameWindow.clientWidth;
+      const distPerFOV = cameraRadius * Math.tan(0.5 * DEG2RAD * FOV_DEG);
+      const distPerPixel = distPerFOV / gameWindow.clientWidth;
 
       if (isLeftMouseDown) {
-        cameraAzimuth_rad -= 0.001 * delta.x;
-        cameraElevation_rad += 0.001 * delta.y;
+
+        cameraAzimuth_rad -= DEG2RAD * degPerPixel * delta.x;
+        cameraElevation_rad += DEG2RAD * degPerPixel * delta.y;
 
         cameraElevation_rad = Math.max(
           Math.min(cameraElevation_rad, Math.PI / 2),
@@ -94,8 +101,10 @@ export function createCamera(gameWindow) {
         );
         updatePosition();
       } else if (isRightMouseDown) {
-        const right = 3e-2 * delta.x;
-        const fwd = 3e-2 * delta.y;
+        // const right = 3e-2 * delta.x;
+        // const fwd = 3e-2 * delta.y;
+        const right = 4 * distPerPixel * delta.x;
+        const fwd = 4 * distPerPixel * delta.y;
 
         // console.log(`Delta ${delta.x}, ${delta.y}; Right ${right}, fwd ${fwd}`);
 
