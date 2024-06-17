@@ -18,12 +18,11 @@ function createGame() {
 
     let { x, y } = selectedObject.userData;
     const tile = city.data[x][y];
-    // console.log(tile);
 
     if (activeToolId === "bulldoze") {
       // remove building at that location
       city.data[x][y].building = undefined;
-    } else if (!tile.buildind) {
+    } else if (!tile.building) {
       // place building at that location
       city.data[x][y].building = buildingFactory[activeToolId]();
     }
