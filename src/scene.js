@@ -15,6 +15,9 @@ export function createScene() {
 
   const renderer = new THREE.WebGLRenderer();
   renderer.setSize(gameWindow.offsetWidth, gameWindow.offsetHeight);
+  renderer.setClearColor(0x000000, 0);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
   gameWindow.appendChild(renderer.domElement); // the domElement is a canvas element
 
   const resizer = new Resizer(gameWindow, camera.camera, renderer);
@@ -77,18 +80,46 @@ export function createScene() {
   }
 
   function setupLights() {
-    const lights = [
-      new THREE.AmbientLight(0xffffff, 0.2),
-      new THREE.DirectionalLight(0xffffff, 0.6),
-      new THREE.DirectionalLight(0xffffff, 0.3),
-      new THREE.DirectionalLight(0xffffff, 0.9),
-    ];
+    const sun = new THREE.DirectionalLight(0xffffff, 1.0);
+    const sunTarget = new THREE.Object3D();
+    sunTarget.position.set(10,10,0);
+    scene.add(sunTarget);
+    sun.position.set(20, 20,20);
+    sun.target = sunTarget;
+    sun.castShadow = true;
+    sun.shadow.camera.left = -20;
+    sun.shadow.camera.right = 20;
+    sun.shadow.camera.top = 20;
+    sun.shadow.camera.bottom = -20;
+    sun.shadow.mapSize.width = 1024;
+    sun.shadow.mapSize.height = 1024;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 50;
+    sun.shadow.camera.up.set(0, 0, 1);
+    // sun.shadow.camera.lookAt(sunTarget.position);
+    sun.shadow.camera.updateMatrix();
+    scene.add(sun);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
-    lights[1].position.set(0, 0, 10);
-    lights[2].position.set(5, 5, 10);
-    lights[3].position.set(-5, 5, 10);
 
-    scene.add(...lights);
+    // const helper = new THREE.DirectionalLightHelper(sun, 5);
+    // scene.add(helper);
+
+    // const helper2 = new THREE.CameraHelper(sun.shadow.camera);
+    // scene.add(helper2);
+
+    // const lights = [
+    //   new THREE.AmbientLight(0xffffff, 0.2),
+    //   new THREE.DirectionalLight(0xffffff, 0.6),
+    //   new THREE.DirectionalLight(0xffffff, 0.3),
+    //   new THREE.DirectionalLight(0xffffff, 0.9),
+    // ];
+
+    // lights[1].position.set(0, 0, 10);
+    // lights[2].position.set(5, 5, 10);
+    // lights[3].position.set(-5, 5, 10);
+
+    // scene.add(...lights);
   }
 
   function draw() {
