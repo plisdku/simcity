@@ -6,10 +6,28 @@ const CITY_SIZE = 20;
 
 console.log("Hello, World!");
 
+class Game {
+  constructor(city, scene) {
+    this.city = city;
+    this.scene = scene;
+  }
+
+  update() {
+    this.city.update();
+    this.scene.update(this.city);
+  }
+
+  setActiveToolId(id) {
+    this.activeToolId = id;
+  }
+}
+
 function createGame() {
   const scene = createScene();
   const city = createCity(CITY_SIZE);
-  let activeToolId = "bulldoze";
+  // let activeToolId = "bulldoze";
+
+  const game = new Game(city, scene);
 
   scene.initialize(city);
   scene.setupLights();
@@ -19,12 +37,12 @@ function createGame() {
     const { x, y } = selectedObject.userData;
     const tile = city.data[x][y];
 
-    if (activeToolId === "bulldoze") {
+    if (game.activeToolId === "bulldoze") {
       // remove building at that location
       city.data[x][y].building = undefined;
     } else if (!tile.building) {
       // place building at that location
-      city.data[x][y].building = buildingFactory[activeToolId]();
+      city.data[x][y].building = buildingFactory[game.activeToolId]();
     }
     city.update();
     scene.update(city);
@@ -44,16 +62,7 @@ function createGame() {
     e.preventDefault();
   });
 
-  const game = {
-    update() {
-      // console.log("Update");
-      city.update();
-      scene.update(city);
-    },
-    setActiveToolId(toolId) {
-      activeToolId = toolId;
-    }
-  };
+
   setInterval(() => {
     game.update();
   }, 1000);
@@ -71,6 +80,9 @@ function createGame() {
 
   return game;
 }
+
+
+
 
 window.onload = () => {
   window.game = createGame();
