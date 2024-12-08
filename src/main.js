@@ -16,7 +16,7 @@ function createGame() {
   scene.onObjectSelected = (selectedObject) => {
     // console.log("Selected", selectedObject);
 
-    let { x, y } = selectedObject.userData;
+    const { x, y } = selectedObject.userData;
     const tile = city.data[x][y];
 
     if (activeToolId === "bulldoze") {
