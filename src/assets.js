@@ -1,10 +1,11 @@
 import * as THREE from "three";
 
-// const grassMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-
 const simpleBox = new THREE.BoxGeometry(1.0, 1.0, 1.0);
 
-// console.log(buildingMaterial, buildingMaterial.copy())
+function createZoneMesh(x, y, data) {
+  
+}
+
 
 const assets = {
   grass: (x, y, data) => {
@@ -42,6 +43,10 @@ const assets = {
     return mesh;
   },
   industrial: (x, y, data) => {
+    if (!data || typeof data.height !== 'number') {
+      console.warn('Invalid data for industrial asset.');
+      return undefined;
+    }
     const buildingMaterial = new THREE.MeshLambertMaterial({
       color: 0x7777ee,
       emissive: 0x000000,
@@ -49,11 +54,15 @@ const assets = {
     const mesh = new THREE.Mesh(simpleBox, buildingMaterial);
     mesh.userData = { id: "industrial", x, y };
     mesh.scale.set(1, 1, data.height);
-    mesh.position.set(x, y, data.height/2);
+    mesh.position.set(x, y, data.height / 2);
     mesh.castShadow = true;
     return mesh;
   },
   road: (x, y, data) => {
+    if (!data || typeof data.height !== 'number') {
+      console.warn('Invalid data for road asset.');
+      return undefined;
+    }
     const buildingMaterial = new THREE.MeshLambertMaterial({
       color: 0x222222,
       emissive: 0x000000,
@@ -61,7 +70,7 @@ const assets = {
     const mesh = new THREE.Mesh(simpleBox, buildingMaterial);
     mesh.userData = { id: "road", x, y };
     mesh.scale.set(1, 1, data.height);
-    mesh.position.set(x, y, data.height/2);
+    mesh.position.set(x, y, data.height / 2);
     mesh.receiveShadow = true;
     return mesh;
   },
