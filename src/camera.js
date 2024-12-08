@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { transformedBitangentWorld } from "three/examples/jsm/nodes/Nodes.js";
 
 const DEG2RAD = Math.PI / 180.0;
 const RAD2DEG = 1 / DEG2RAD;
@@ -79,13 +78,13 @@ export function createCamera(gameWindow) {
     isRightMouseDown = false;
   }
 
-  function onMouseMove(event) {
+  function handleMouseMove(event) {
     const curMousePosition = new THREE.Vector2(event.clientX, event.clientY);
 
     if (prevMousePosition === null) {
     } else {
       const delta = curMousePosition.clone().sub(prevMousePosition);
-      
+
       const degPerPixel = 5 * FOV_DEG / gameWindow.clientWidth;
       const distPerFOV = cameraRadius * Math.tan(0.5 * DEG2RAD * FOV_DEG);
       const distPerPixel = distPerFOV / gameWindow.clientWidth;
@@ -138,7 +137,7 @@ export function createCamera(gameWindow) {
     camera,
     onMouseDown,
     onMouseUp,
-    onMouseMove,
+    onMouseMove: handleMouseMove,
     onWheel,
   };
 }
