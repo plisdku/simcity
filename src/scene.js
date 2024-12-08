@@ -31,6 +31,16 @@ export function createScene() {
   let terrain = [];
   let buildings = [];
 
+  const cityGroup = new THREE.Group();
+  cityGroup.name = "CityGroup";
+
+  function getObjectSize(object) {
+    const box = new THREE.Box3().setFromObject(object);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    return size;
+  }
+
   function initialize(city) {
     scene.clear();
     terrain = [];
@@ -45,11 +55,17 @@ export function createScene() {
           console.log("UNDEFINED: ", terrainId, x, y);
         }
         column.push(mesh);
-        scene.add(mesh);
+        // scene.add(mesh);
+        cityGroup.add(mesh);
       }
       terrain.push(column);
       buildings.push([...Array(city.size)]); // column of undefined values
     }
+    scene.add(cityGroup);
+    console.log("City group size", getObjectSize(cityGroup));
+
+    const size = getObjectSize(cityGroup)
+    cityGroup.position.set(-size.x/2, -size.y/2, 0);
   }
 
   function update(city) {
@@ -58,21 +74,23 @@ export function createScene() {
       const column = [];
       for (let y = 0; y < city.size; y += 1) {
         const tile = city.data[x][y];
+
         const existingBuildingMesh = buildings[x][y];
 
         // If the player removes a building, remove it from the scene
         if (!tile.building && existingBuildingMesh) {
-          scene.remove(buildings[x][y]);
+          cityGroup.remove(buildings[x][y]);
           buildings[x][y] = undefined;
         }
 
         // If the data model has changed
         if (tile.building && tile.building.updated) {
-          scene.remove(buildings[x][y]);
+          console.log("Updating building at", x, y);
+          cityGroup.remove(buildings[x][y]);
           const mesh = createAssetInstance(tile.building.id, x, y, tile.building);
           
           buildings[x][y] = mesh;
-          scene.add(mesh);
+          cityGroup.add(mesh);
           tile.building.updated = false;
         }
       }
@@ -147,7 +165,7 @@ export function createScene() {
 
     raycaster.setFromCamera(mouse, camera.camera);
 
-    let intersections = raycaster.intersectObjects(scene.children, false);
+    let intersections = raycaster.intersectObjects(cityGroup.children, false);
 
     if (selectedObject) {
       selectedObject.material.emissive.setHex(0);
@@ -163,6 +181,9 @@ export function createScene() {
       if (this.onObjectSelected) {
         this.onObjectSelected(selectedObject)
       }
+    }
+    else {
+      console.log("No intersection");
     }
   }
 
