@@ -199,6 +199,11 @@ export function createScene() {
     camera.onWheel(event);
   }
 
+  function onContextMenu(event) {
+    camera.onContextMenu(event);
+    event.preventDefault();
+  }
+
   return {
     start,
     stop,

@@ -10,7 +10,8 @@ const INITIAL_ELEVATION = 30 * DEG2RAD;
 const INITIAL_RADIUS = 25;
 
 const LEFT_MOUSE_BUTTON = 0;
-const RIGHT_MOUSE_BUTTON = 1;
+const MIDDLE_MOUSE_BUTTON = 1;
+const RIGHT_MOUSE_BUTTON = 2;
 
 export class CameraController {
   constructor(gameWindow) {
@@ -59,19 +60,36 @@ export class CameraController {
     this.camera.lookAt(this.cameraLookAt);
     this.camera.updateMatrix();
   }
-
+  /**
+   * Handles the mouse down event to update the mouse button status.
+   * Sets the appropriate mouse button status to true and records the initial mouse position.
+   *
+   * @param {MouseEvent} event - The mouse down event.
+   */
   onMouseDown(event) {
     if (event.button == LEFT_MOUSE_BUTTON) {
       this.isLeftMouseDown = true;
-    } else if (event.button == RIGHT_MOUSE_BUTTON || event.ctrlKey) {
+    } else if (event.button == RIGHT_MOUSE_BUTTON) {
       this.isRightMouseDown = true;
     }
+
+    if (event.ctrlKey) {
+      this.isCtrl = true;
+    }
+    if (event.shiftKey) {
+      this.isShift = true;
+    }
+
     this.prevMousePosition = { x: event.clientX, y: event.clientY };
+
+    this.logMouseAndButtonStates();
   }
 
   onMouseUp(event) {
     this.isLeftMouseDown = false;
     this.isRightMouseDown = false;
+    this.isShift = false;
+    this.isCtrl = false;
   }
 
   /**
@@ -85,7 +103,6 @@ export class CameraController {
     if (this.prevMousePosition === null) {
       return;
     }
-
     const curMousePosition = { x: event.clientX, y: event.clientY };
 
     const delta = {
@@ -97,7 +114,7 @@ export class CameraController {
     const distPerFOV = this.cameraRadius * Math.tan(0.5 * DEG2RAD * FOV_DEG);
     const distPerPixel = distPerFOV / this.gameWindow.clientWidth;
 
-    if (this.isLeftMouseDown) {
+    if (this.isLeftMouseDown && this.isShift) {
       this.cameraAzimuth_rad -= DEG2RAD * degPerPixel * delta.x;
       this.cameraElevation_rad += DEG2RAD * degPerPixel * delta.y;
 
@@ -106,8 +123,8 @@ export class CameraController {
         0
       );
       this.updatePosition();
-    } else if (this.isRightMouseDown) {
-      console.log("RMBD")
+    } else if (this.isRightMouseDown || (this.isLeftMouseDown && this.isCtrl)) {
+      console.log("Panning");
       const right = 4 * distPerPixel * delta.x;
       const fwd = 4 * distPerPixel * delta.y;
 
@@ -128,6 +145,8 @@ export class CameraController {
       this.cameraLookAt.x += dx;
       this.cameraLookAt.y += dy;
       this.updatePosition();
+    } else {
+      console.log("Left", this.isLeftMouseDown, "Right", this.isRightMouseDown, "Ctrl", this.isCtrl);
     }
 
     this.prevMousePosition = { x: event.clientX, y: event.clientY };
@@ -138,131 +157,20 @@ export class CameraController {
     this.cameraRadius = Math.max(2, this.cameraRadius);
     this.updatePosition();
   }
+
+  onContextMenu(event) {
+    // nothing
+  }
+
+  /**
+   * Logs the current mouse and button states.
+   */
+  logMouseAndButtonStates() {
+    console.log("Mouse Position:", this.prevMousePosition);
+    console.log("Left Mouse Down:", this.isLeftMouseDown);
+    console.log("Middle Mouse Down:", this.isMiddleMouseDown);
+    console.log("Right Mouse Down:", this.isRightMouseDown);
+    console.log("Ctrl Down:", this.isCtrl);
+    console.log("Shift Down:", this.isShift);
+  }
 }
-
-// export function createCamera(gameWindow) {
-//   const camera = new THREE.PerspectiveCamera(
-//     FOV_DEG,
-//     gameWindow.offsetWidth / gameWindow.offsetHeight,
-//     0.1,
-//     1000
-//   );
-
-//   let cameraRadius = INITIAL_RADIUS;
-//   let cameraAzimuth_rad = INITIAL_AZIMUTH;
-//   let cameraElevation_rad = INITIAL_ELEVATION;
-//   let cameraLookAt = new THREE.Vector3(0, 0, 0);
-
-//   // Math.PI / 10;
-//   function updatePosition() {
-//     camera.position.x =
-//       cameraLookAt.x +
-//       cameraRadius *
-//         Math.cos(cameraAzimuth_rad) *
-//         Math.cos(cameraElevation_rad);
-//     camera.position.y =
-//       cameraLookAt.y +
-//       cameraRadius *
-//         Math.sin(cameraAzimuth_rad) *
-//         Math.cos(cameraElevation_rad);
-//     camera.position.z = cameraRadius * Math.sin(cameraElevation_rad);
-
-//     camera.up.set(0, 0, 1);
-//     camera.lookAt(cameraLookAt);
-//     camera.updateMatrix();
-
-//     // console.log("Look at", cameraLookAt);
-
-//     // camera.rotation.set();
-//     // console.log("Azimuth:", RAD2DEG * cameraAzimuth_rad);
-//     // console.log("Elevation:", RAD2DEG * cameraElevation_rad);
-//     // console.log("Cam pos", camera.position);
-//   }
-
-//   updatePosition();
-
-//   let isLeftMouseDown = false;
-//   let isRightMouseDown = false;
-//   let isMiddleMouseDown = false;
-//   let prevMousePosition = null; //new THREE.Vector2(0, 0);
-
-//   function onMouseDown(event) {
-//     // console.log(event);
-
-//     // console.log("DOWN button ", event.button);
-//     // console.log(event);
-
-//     if (event.button == RIGHT_MOUSE_BUTTON || event.ctrlKey) {
-//       isRightMouseDown = true;
-//     } else if (event.button == LEFT_MOUSE_BUTTON) {
-//       isLeftMouseDown = true;
-//     }
-//   }
-
-//   function onMouseUp(event) {
-//     // console.log(event);
-
-//     isLeftMouseDown = false;
-//     isRightMouseDown = false;
-//   }
-
-//   function onMouseMove(event) {
-//     const curMousePosition = new THREE.Vector2(event.clientX, event.clientY);
-
-//     if (prevMousePosition === null) {
-//     } else {
-//       const delta = curMousePosition.clone().sub(prevMousePosition);
-
-//       const degPerPixel = (5 * FOV_DEG) / gameWindow.clientWidth;
-//       const distPerFOV = cameraRadius * Math.tan(0.5 * DEG2RAD * FOV_DEG);
-//       const distPerPixel = distPerFOV / gameWindow.clientWidth;
-
-//       if (isLeftMouseDown) {
-//         cameraAzimuth_rad -= DEG2RAD * degPerPixel * delta.x;
-//         cameraElevation_rad += DEG2RAD * degPerPixel * delta.y;
-
-//         cameraElevation_rad = Math.max(
-//           Math.min(cameraElevation_rad, Math.PI / 2),
-//           0
-//         );
-//         updatePosition();
-//       } else if (isRightMouseDown) {
-//         const right = 4 * distPerPixel * delta.x;
-//         const fwd = 4 * distPerPixel * delta.y;
-
-//         // console.log(`Delta ${delta.x}, ${delta.y}; Right ${right}, fwd ${fwd}`);
-
-//         const sin = Math.sin(cameraAzimuth_rad);
-//         const cos = Math.cos(cameraAzimuth_rad);
-
-//         // console.log(`sin ${sin} cos ${cos}`);
-
-//         const worldDirection = new THREE.Vector3();
-//         camera.getWorldDirection(worldDirection);
-//         // console.log(worldDirection);
-
-//         const dx = sin * right + fwd * worldDirection.x;
-//         const dy = -cos * right + fwd * worldDirection.y;
-//         // console.log(`dx = ${dx}, dy = ${dy}`);
-//         this.cameraLookAt.x += dx;
-//         this.cameraLookAt.y += dy;
-//         this.updatePosition();
-//       }
-//     }
-//     this.prevMousePosition = curMousePosition;
-//   }
-
-//   function onWheel(event) {
-//     this.cameraRadius -= 0.01 * event.wheelDelta;
-//     this.cameraRadius = Math.max(2, cameraRadius);
-//     this.updatePosition();
-//   }
-
-//   return {
-//     camera,
-//     onMouseDown,
-//     onMouseUp,
-//     onMouseMove: handleMouseMove,
-//     onWheel,
-//   };
-// }
