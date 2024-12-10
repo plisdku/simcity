@@ -1,5 +1,5 @@
 import { createCity } from "./city";
-import { createScene } from "./scene";
+import { SceneController } from "./scene";
 import buildingFactory from "./buildings";
 
 const CITY_SIZE = 20;
@@ -23,7 +23,7 @@ class Game {
 }
 
 function createGame() {
-  const scene = createScene();
+  const scene = new SceneController(document.getElementById("render-target"));
   const city = createCity(CITY_SIZE);
   // let activeToolId = "bulldoze";
 
