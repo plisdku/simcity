@@ -59,6 +59,7 @@ function createGame() {
   document.addEventListener("wheel", scene.onWheel.bind(scene), false);
 
   document.addEventListener("contextmenu", (e) => {
+    console.log("contextmenu")
     e.preventDefault();
   });
 

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import { createCamera } from "./camera";
+import { CameraController } from "./camera";
 import { Resizer } from "./resizer";
 import { createAssetInstance } from "./assets";
 
@@ -11,7 +11,7 @@ export function createScene() {
 
   console.log("Created scene! Game window:", gameWindow);
 
-  const camera = createCamera(gameWindow);
+  const camera = new CameraController(gameWindow);
 
   const renderer = new THREE.WebGLRenderer();
   renderer.setSize(gameWindow.offsetWidth, gameWindow.offsetHeight);
