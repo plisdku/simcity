@@ -1,5 +1,6 @@
 import { createCity } from "./city";
 import { SceneController } from "./scene";
+import { InputController } from "./inputcontroller";
 import buildingFactory from "./buildings";
 
 const CITY_SIZE = 20;
@@ -7,9 +8,39 @@ const CITY_SIZE = 20;
 console.log("Hello, World!");
 
 class Game {
-  constructor(city, scene) {
-    this.city = city;
-    this.scene = scene;
+  constructor() {
+    this.scene = new SceneController(document.getElementById("render-target"));
+    this.city = createCity(CITY_SIZE);
+    this.input = new InputController(document.getElementById("render-target"), this.scene, this.scene.camera);
+    this.activeToolId = null;
+
+    this.scene.initialize(this.city);
+    this.scene.setupLights();
+    this.scene.start();
+
+    this.scene.onObjectSelected = (selectedObject) => {
+      // console.log("Selected", selectedObject);
+
+      const { x, y } = selectedObject.userData;
+      const tile = this.city.data[x][y];
+
+      if (this.activeToolId === "bulldoze") {
+        // remove building at that location
+        this.city.data[x][y].building = undefined;
+      } else if (!tile.building) {
+        // place building at that location
+        this.city.data[x][y].building = buildingFactory[this.activeToolId]();
+      }
+      this.city.update();
+      this.scene.update(this.city);
+    };
+
+
+    console.log("Window loaded, scene started.");
+
+    setInterval(() => {
+      this.update();
+    }, 1000)
   }
 
   update() {
@@ -22,77 +53,22 @@ class Game {
   }
 }
 
-function createGame() {
-  const scene = new SceneController(document.getElementById("render-target"));
-  const city = createCity(CITY_SIZE);
-  // let activeToolId = "bulldoze";
-
-  const game = new Game(city, scene);
-
-  scene.initialize(city);
-  scene.setupLights();
-  scene.onObjectSelected = (selectedObject) => {
-    // console.log("Selected", selectedObject);
-
-    const { x, y } = selectedObject.userData;
-    const tile = city.data[x][y];
-
-    if (game.activeToolId === "bulldoze") {
-      // remove building at that location
-      city.data[x][y].building = undefined;
-    } else if (!tile.building) {
-      // place building at that location
-      city.data[x][y].building = buildingFactory[game.activeToolId]();
-    }
-    city.update();
-    scene.update(city);
-  }
-
-  // console.log("oos:", scene.onObjectSelected)
-  scene.start();
-
-  console.log("Window loaded, scene started.");
-
-  document.addEventListener("mousedown", scene.onMouseDown.bind(scene), false);
-  document.addEventListener("mouseup", scene.onMouseUp.bind(scene), false);
-  document.addEventListener("mousemove", scene.onMouseMove.bind(scene), false);
-  document.addEventListener("wheel", scene.onWheel.bind(scene), false);
-
-  document.addEventListener("contextmenu", (e) => {
-    console.log("contextmenu")
-    e.preventDefault();
-  });
-
-
-  setInterval(() => {
-    game.update();
-  }, 1000);
-
-  // game.update();
-
-  // function zoom(e) {
-  //   console.log(e.scale);
-  //   e.preventDefault();
-  // }
-  // console.log("EVENTS");
-  // document.addEventListener("gesturestart", zoom);
-  // document.addEventListener("gesturechange", zoom);
-  // document.addEventListener("gestureend", zoom);
-
-  return game;
-}
-
-
-
+/**
+ * Create the game and GOOOOO!
+ * 
+ * From here on, we are defining things that we want to be accessible from the HTML.
+ */
 
 window.onload = () => {
-  window.game = createGame();
+  window.game = new Game();
 };
 
 let selectedControl = document.getElementById("button-bulldoze");
-// console.log("Selected:", selectedControl)
+
+/**
+ * Function referenced from the HTML
+ */
 window.setActiveTool = (event, id) => {
-  // console.log("Set active:", event, id)
   if (selectedControl) {
     selectedControl.classList.remove("selected");
   }

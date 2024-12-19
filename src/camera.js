@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { InputState } from "./inputcontroller";
 
 const DEG2RAD = Math.PI / 180.0;
 const RAD2DEG = 1 / DEG2RAD;
@@ -9,9 +10,20 @@ const INITIAL_AZIMUTH = 30 * DEG2RAD;
 const INITIAL_ELEVATION = 30 * DEG2RAD;
 const INITIAL_RADIUS = 25;
 
-const LEFT_MOUSE_BUTTON = 0;
-const MIDDLE_MOUSE_BUTTON = 1;
-const RIGHT_MOUSE_BUTTON = 2;
+/*
+How is this supposed to work?
+
+Hover: whatever I hover over is highlighted
+Left click: select or use tool
+Left click and drag or three finger drag: use tool over everything
+Right click: context menu
+Space and click: pan
+Mouse wheel or pinch or two finger drag: zoom
+Arrow keys: pan
+How do I rotate the camera though, on a laptop?
+
+I think this is unintuitive. Maybe I'll hold down shift for brushstrokes.
+*/
 
 export class CameraController {
   constructor(gameWindow) {
@@ -28,11 +40,6 @@ export class CameraController {
     this.cameraAzimuth_rad = INITIAL_AZIMUTH;
     this.cameraElevation_rad = INITIAL_ELEVATION;
     this.cameraLookAt = new THREE.Vector3(0, 0, 0);
-
-    this.isLeftMouseDown = false;
-    this.isRightMouseDown = false;
-    this.isMiddleMouseDown = false;
-    this.prevMousePosition = null; //new THREE.Vector2(0, 0);
 
     this.updatePosition();
   }
@@ -64,69 +71,31 @@ export class CameraController {
    * Handles the mouse down event to update the mouse button status.
    * Sets the appropriate mouse button status to true and records the initial mouse position.
    *
-   * @param {MouseEvent} event - The mouse down event.
+   * @param {InputState} state - The mouse down event.
    */
-  onMouseDown(event) {
-    if (event.button == LEFT_MOUSE_BUTTON) {
-      this.isLeftMouseDown = true;
-    } else if (event.button == RIGHT_MOUSE_BUTTON) {
-      this.isRightMouseDown = true;
-    }
+  onMouseDown(state) {}
 
-    if (event.ctrlKey) {
-      this.isCtrl = true;
-    }
-    if (event.shiftKey) {
-      this.isShift = true;
-    }
-
-    this.prevMousePosition = { x: event.clientX, y: event.clientY };
-
-    this.logMouseAndButtonStates();
-  }
-
-  onMouseUp(event) {
-    this.isLeftMouseDown = false;
-    this.isRightMouseDown = false;
-    this.isShift = false;
-    this.isCtrl = false;
-  }
+  onMouseUp(state) {}
 
   /**
    * Handles the mouse move event to update the camera's position and orientation.
    * If the left mouse button is held down, the camera rotates around the `cameraLookAt` point.
    * If the right mouse button is held down, the camera pans across the scene.
    *
-   * @param {MouseEvent} event - The mouse move event.
+   * @param {InputState} state - The mouse move event.
    */
-  onMouseMove(event) {
-    if (this.prevMousePosition === null) {
-      return;
-    }
-    const curMousePosition = { x: event.clientX, y: event.clientY };
-
-    const delta = {
-      x: curMousePosition.x - this.prevMousePosition.x,
-      y: curMousePosition.y - this.prevMousePosition.y,
-    };
+  onMouseMove(state) {
+    console.log(state);
 
     const degPerPixel = (5 * FOV_DEG) / this.gameWindow.clientWidth;
     const distPerFOV = this.cameraRadius * Math.tan(0.5 * DEG2RAD * FOV_DEG);
     const distPerPixel = distPerFOV / this.gameWindow.clientWidth;
 
-    if (this.isLeftMouseDown && this.isShift) {
-      this.cameraAzimuth_rad -= DEG2RAD * degPerPixel * delta.x;
-      this.cameraElevation_rad += DEG2RAD * degPerPixel * delta.y;
-
-      this.cameraElevation_rad = Math.max(
-        Math.min(this.cameraElevation_rad, Math.PI / 2),
-        0
-      );
-      this.updatePosition();
-    } else if (this.isRightMouseDown || (this.isLeftMouseDown && this.isCtrl)) {
+    if (state.isLeftMouseDown && state.isSpaceDown) {
+      // Pan.
       console.log("Panning");
-      const right = 4 * distPerPixel * delta.x;
-      const fwd = 4 * distPerPixel * delta.y;
+      const right = 4 * distPerPixel * state.delta.x;
+      const fwd = 4 * distPerPixel * state.delta.y;
 
       // console.log(`Delta ${delta.x}, ${delta.y}; Right ${right}, fwd ${fwd}`);
 
@@ -135,21 +104,34 @@ export class CameraController {
 
       // console.log(`sin ${sin} cos ${cos}`);
 
-      let wd = new THREE.Vector3();
-      this.camera.getWorldDirection(wd);
-      // console.log(wd);
+      let worldDirection = new THREE.Vector3();
+      this.camera.getWorldDirection(worldDirection);
 
-      const dx = sin * right + fwd * wd.x;
-      const dy = -cos * right + fwd * wd.y;
+      const dx = sin * right + fwd * worldDirection.x;
+      const dy = -cos * right + fwd * worldDirection.y;
       // console.log(`dx = ${dx}, dy = ${dy}`);
       this.cameraLookAt.x += dx;
       this.cameraLookAt.y += dy;
       this.updatePosition();
-    } else {
-      console.log("Left", this.isLeftMouseDown, "Right", this.isRightMouseDown, "Ctrl", this.isCtrl);
-    }
+    } else if (state.isLeftMouseDown) {
+      this.cameraAzimuth_rad -= DEG2RAD * degPerPixel * state.delta.x;
+      this.cameraElevation_rad += DEG2RAD * degPerPixel * state.delta.y;
 
-    this.prevMousePosition = { x: event.clientX, y: event.clientY };
+      this.cameraElevation_rad = Math.max(
+        Math.min(this.cameraElevation_rad, Math.PI / 2),
+        0
+      );
+      this.updatePosition();
+    } else {
+      console.log(
+        "Left",
+        state.isLeftMouseDown,
+        "Right",
+        state.isRightMouseDown,
+        "Ctrl",
+        state.isCtrl
+      );
+    }
   }
 
   onWheel(event) {
@@ -160,17 +142,5 @@ export class CameraController {
 
   onContextMenu(event) {
     // nothing
-  }
-
-  /**
-   * Logs the current mouse and button states.
-   */
-  logMouseAndButtonStates() {
-    console.log("Mouse Position:", this.prevMousePosition);
-    console.log("Left Mouse Down:", this.isLeftMouseDown);
-    console.log("Middle Mouse Down:", this.isMiddleMouseDown);
-    console.log("Right Mouse Down:", this.isRightMouseDown);
-    console.log("Ctrl Down:", this.isCtrl);
-    console.log("Shift Down:", this.isShift);
   }
 }

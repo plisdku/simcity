@@ -118,7 +118,7 @@ export class SceneController {
       }
     }
   }
-  
+
   setupLights() {
     const sun = new THREE.DirectionalLight(0xffffff, 1.0);
     const sunTarget = new THREE.Object3D();
@@ -174,51 +174,78 @@ export class SceneController {
     this.renderer.setAnimationLoop(null);
   }
 
-  onMouseDown(event) {
-    this.camera.onMouseDown(event);
-
+  getObjectUnderMouse(state) {
     const mouse = new THREE.Vector2(
-      (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1,
-      -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1
+      (state.cur.x / this.renderer.domElement.clientWidth) * 2 - 1,
+      -(state.cur.y / this.renderer.domElement.clientHeight) * 2 + 1
     );
 
     this.raycaster.setFromCamera(mouse, this.camera.camera);
 
-    let intersections = this.raycaster.intersectObjects(this.cityGroup.children, false);
+    let intersections = this.raycaster.intersectObjects(
+      this.cityGroup.children,
+      false
+    );
 
-    if (this.selectedObject) {
-      this.selectedObject.material.emissive.setHex(0);
+    if (intersections.length === 0) {
+      return undefined;
+    } else {
+      return intersections[0].object;
+    }
+  }
+
+  onMouseDown(state) {
+    this.mouseDownObject = this.getObjectUnderMouse(state);
+  }
+
+  onMouseUp(state) {
+    console.log("Mouse up for scene");
+
+    const mouseObject = this.getObjectUnderMouse(state);
+    
+    if (mouseObject) {
+      this.selectedObject = mouseObject;
     }
 
-    if (intersections.length > 0) {
-      this.selectedObject = intersections[0].object;
-      this.selectedObject.material.emissive.setHex(0x555555);
+    // if (intersections.length > 0) {
+    //   this.selectedObject = intersections[0].object;
+    //   this.selectedObject.material.emissive.setHex(0x555555);
 
-      // console.log("User data", this.selectedObject.userData)
-      // console.log(`Tile ${this.selectedObject.userData.x}, ${this.selectedObject.userData.y}`);
+    //   // console.log("User data", this.selectedObject.userData)
+    //   // console.log(`Tile ${this.selectedObject.userData.x}, ${this.selectedObject.userData.y}`);
 
+    //   if (this.onObjectSelected) {
+    //     this.onObjectSelected(this.selectedObject);
+    //   }
+    //   else {
+    //     console.log("No object selected callback");
+    //   }
+    // } else {
+    //   console.log("No intersection");
+    // }
+  }
+
+  onMouseMove(state) {
+    console.log("On mouse move for scene", state);
+    if (state.moved()) {
+      console.log("Mouse move, currently", state.cur);
+      const mouseObject = this.getObjectUnderMouse(state);
+      
       if (this.onObjectSelected) {
-        this.onObjectSelected(this.selectedObject)
+        this.onObjectSelected(mouseObject);
       }
-    }
-    else {
-      console.log("No intersection");
-    }
-  }
 
-  onMouseUp(event) {
-    this.camera.onMouseUp(event);
-  }
+      // if (this.mouseDownObject) {
 
-  onMouseMove(event) {
-    this.camera.onMouseMove(event);
+      // }
+    }
   }
 
   onWheel(event) {
-    this.camera.onWheel(event);
+    // this.camera.onWheel(event);
   }
 
   onContextMenu(event) {
-    this.event.preventDefault();
+    // this.event.preventDefault();
   }
 }
