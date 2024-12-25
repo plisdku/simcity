@@ -31,7 +31,8 @@ class InputState {
       }
       const dx = this.cur.x - this.down.x;
       const dy = this.cur.y - this.down.y
-      return Math.abs(dx) < FUDGE_PIXELS &&  Math.abs(dy) < FUDGE_PIXELS;
+      console.log("Moved", dx, dy);
+      return Math.abs(dx) > FUDGE_PIXELS ||  Math.abs(dy) > FUDGE_PIXELS;
   }
 }
 
@@ -44,32 +45,46 @@ class InputController {
    * @param {CameraController} camera
    */
   constructor(gameWindow, scene, camera) {
-    this.gameWindow = gameWindow;
-    this.scene = scene;
-    this.camera = camera;
+    this.listeners = {};
+    // this.gameWindow = gameWindow;
+    // this.scene = scene;
+    // this.camera = camera;
 
     this.state = new InputState();
-
-    this.bindEventListeners();
   }
 
-  bindEventListeners() {
-    this.gameWindow.addEventListener(
+  on(eventType, callback) {
+    if (!this.listeners[eventType]) {
+      this.listeners[eventType] = [];
+    }
+    this.listeners[eventType].push(callback);
+  }
+
+  emit(eventType, event) {
+    if (this.listeners[eventType]) {
+      this.listeners[eventType].forEach( (callback) => {
+        callback(event, this.state);
+      })
+    }
+  }
+
+  bindEventListeners(gameWindow) {
+    gameWindow.addEventListener(
       "mousedown",
       this.onMouseDown.bind(this),
       false
     );
-    this.gameWindow.addEventListener(
+    gameWindow.addEventListener(
       "mouseup",
       this.onMouseUp.bind(this),
       false
     );
-    this.gameWindow.addEventListener(
+    gameWindow.addEventListener(
       "mousemove",
       this.onMouseMove.bind(this),
       false
     );
-    this.gameWindow.addEventListener("wheel", this.onWheel.bind(this), false);
+    gameWindow.addEventListener("wheel", this.onWheel.bind(this), false);
     document.addEventListener(
       "keydown",
       this.onKeyDown.bind(this),
@@ -77,7 +92,7 @@ class InputController {
     );
     document.addEventListener("keyup", this.onKeyUp.bind(this), false);
 
-    this.gameWindow.addEventListener("contextmenu", (e) => {
+    gameWindow.addEventListener("contextmenu", (e) => {
       console.log("contextmenu");
       e.preventDefault();
     });
@@ -93,6 +108,8 @@ class InputController {
       this.state.isSpaceDown = true;
       event.preventDefault(); // prevent scrolling
     }
+
+    this.emit("keydown", event);
   }
 
   /**
@@ -104,6 +121,8 @@ class InputController {
     if (event.code === "Space") {
       this.state.isSpaceDown = false;
     }
+
+    this.emit("keyup", event);
   }
 
   /**
@@ -112,12 +131,15 @@ class InputController {
    * @param {MouseEvent} - The mouse down event.
    */
   onMouseDown(event) {
+    console.log("Input controller mouse down");
     if (event.button == LEFT_MOUSE_BUTTON) {
       this.state.isLeftMouseDown = true;
     } else if (event.button == RIGHT_MOUSE_BUTTON) {
       this.state.isRightMouseDown = true;
     } else if (event.button == MIDDLE_MOUSE_BUTTON) {
       this.state.isMiddleMouseDown = true;
+    } else {
+      console.log("PURE DRAG BABY");
     }
 
     if (event.ctrlKey) {
@@ -130,7 +152,11 @@ class InputController {
     this.state.down = { x: event.clientX, y: event.clientY };
     this.state.prev = { x: event.clientX, y: event.clientY };
 
-    console.log("Set down to", this.state.down);
+    this.emit("mousedown", event);
+
+    // this.scene.onMouseDown(this.state);
+
+    // console.log("Set down to", this.state.down);
 
     // this.logMouseAndButtonStates();
   }
@@ -141,17 +167,20 @@ class InputController {
    * @param {MouseEvent} event - The mouse up event.
    */
   onMouseUp(event) {
+    console.log("Input controller mouse up");
     this.state.isLeftMouseDown = false;
     this.state.isRightMouseDown = false;
     this.state.isMiddleMouseDown = false;
     this.state.isShift = false;
     this.state.isCtrl = false;
 
-    if (this.state.moved()) {
-      this.scene.onMouseUp(this.state);
-    }
+    this.emit("mouseup", event);
 
-    console.log("State down nulling.");
+    // if (this.state.moved()) {
+    //   this.scene.onMouseUp(this.state);
+    // }
+
+    // console.log("State down nulling.");
 
     this.state.down = null;
   }
@@ -162,7 +191,7 @@ class InputController {
    * @param {MouseEvent} event - The mouse move event.
    */
   onMouseMove(event) {
-
+    console.log("Input controller mouse move");
     if (this.state.prev === null) {
       this.state.prev = { x: event.clientX, y: event.clientY };
     }
@@ -176,17 +205,19 @@ class InputController {
     // If shift is held, pass this to the scene for tool stuff.
     // Otherwise, pass to the camera controller.
 
-    if (this.state.isShift) {
-      // Scene can apply whatever the current tool is, over and over.
-      // It doesn't need the delta. It probably does want to be tracking
-      // the previously moused-over object to see if it needs to do anything
-      // else.
-      this.scene.onMouseMove(this.state);
-    } else {
-      // Camera will pan or rotate. But, which one?
-      // Maybe need to check the space bar?
-      this.camera.onMouseMove(this.state);
-    }
+    this.emit("mousemove", event);
+
+    // if (this.state.isShift) {
+    //   // Scene can apply whatever the current tool is, over and over.
+    //   // It doesn't need the delta. It probably does want to be tracking
+    //   // the previously moused-over object to see if it needs to do anything
+    //   // else.
+    //   this.scene.onMouseMove(this.state);
+    // } else {
+    //   // Camera will pan or rotate. But, which one?
+    //   // Maybe need to check the space bar?
+    //   this.camera.onMouseMove(this.state);
+    // }
 
     this.state.prev = this.state.cur;
   }
@@ -197,7 +228,8 @@ class InputController {
    * @param {WheelEvent} event - The wheel event.
    */
   onWheel(event) {
-    this.camera.onWheel(event);
+    this.emit("wheel", event);
+    // this.camera.onWheel(event);
   }
 
   /**

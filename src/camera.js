@@ -85,8 +85,6 @@ export class CameraController {
    * @param {InputState} state - The mouse move event.
    */
   onMouseMove(state) {
-    console.log(state);
-
     const degPerPixel = (5 * FOV_DEG) / this.gameWindow.clientWidth;
     const distPerFOV = this.cameraRadius * Math.tan(0.5 * DEG2RAD * FOV_DEG);
     const distPerPixel = distPerFOV / this.gameWindow.clientWidth;

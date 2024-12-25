@@ -1,7 +1,6 @@
 import { createCity } from "./city";
 import { SceneController } from "./scene";
 import { InputController } from "./inputcontroller";
-import buildingFactory from "./buildings";
 
 const CITY_SIZE = 20;
 
@@ -11,29 +10,53 @@ class Game {
   constructor() {
     this.scene = new SceneController(document.getElementById("render-target"));
     this.city = createCity(CITY_SIZE);
-    this.input = new InputController(document.getElementById("render-target"), this.scene, this.scene.camera);
-    this.activeToolId = null;
+    this.input = new InputController();
+    this.input.bindEventListeners(document.getElementById("render-target"));
+    this.activeToolId = "bulldozer";
 
     this.scene.initialize(this.city);
     this.scene.setupLights();
     this.scene.start();
 
-    this.scene.onObjectSelected = (selectedObject) => {
-      // console.log("Selected", selectedObject);
+    this.input.on("mousedown", (event, state) => {
+      this.scene.onMouseDown(state);
+      this.scene.camera.onMouseDown(state);
+    });
 
-      const { x, y } = selectedObject.userData;
-      const tile = this.city.data[x][y];
+    this.input.on("mouseup", (event, state) => {
+      this.scene.onMouseUp(state, this.activeToolId, this.city);
+      this.scene.camera.onMouseUp(state);
+    });
 
-      if (this.activeToolId === "bulldoze") {
-        // remove building at that location
-        this.city.data[x][y].building = undefined;
-      } else if (!tile.building) {
-        // place building at that location
-        this.city.data[x][y].building = buildingFactory[this.activeToolId]();
+    this.input.on("mousemove", (event, state) => {
+      if (state.isShift) {
+        this.scene.onMouseMove(state, this.activeToolId, this.city);
+      } else {
+        this.scene.camera.onMouseMove(state);
       }
-      this.city.update();
-      this.scene.update(this.city);
-    };
+    });
+
+    this.input.on("wheel", (event, state) => {
+      this.scene.camera.onWheel(event);
+    });
+
+
+    // this.scene.onObjectSelected = (selectedObject) => {
+    //   // console.log("Selected", selectedObject);
+
+    //   const { x, y } = selectedObject.userData;
+    //   const tile = this.city.data[x][y];
+
+    //   if (this.activeToolId === "bulldoze") {
+    //     // remove building at that location
+    //     this.city.data[x][y].building = undefined;
+    //   } else if (!tile.building) {
+    //     // place building at that location
+    //     this.city.data[x][y].building = buildingFactory[this.activeToolId]();
+    //   }
+    //   this.city.update();
+    //   this.scene.update(this.city);
+    // };
 
 
     console.log("Window loaded, scene started.");

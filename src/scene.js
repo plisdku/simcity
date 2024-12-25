@@ -4,6 +4,8 @@ import { CameraController } from "./camera";
 import { Resizer } from "./resizer";
 import { createAssetInstance } from "./assets";
 
+import buildingFactory from "./buildings";
+
 const BACKGROUND_COLOR = 0x777777;
 
 function getObjectSize(object) {
@@ -38,9 +40,9 @@ export class SceneController {
 
     this.raycaster = new THREE.Raycaster();
 
+    this.lastAffectedObject = undefined;
     this.selectedObject = undefined;
     this.hoverObject = undefined;
-    this.onObjectSelected = undefined;
 
     this.terrain = [];
     this.buildings = [];
@@ -194,50 +196,64 @@ export class SceneController {
     }
   }
 
-  onMouseDown(state) {
-    this.mouseDownObject = this.getObjectUnderMouse(state);
+  /**
+   * 
+   * @param {*} activeToolId 
+   * @param {*} selectedObject 
+   * @param {City} city 
+   */
+  onObjectSelected(activeToolId, selectedObject, city) {
+    console.log("Active tool", activeToolId);
+    const { x, y } = selectedObject.userData;
+    const tile = city.data[x][y];
+
+    if (activeToolId === "bulldoze") {
+      // remove building at that location
+      city.data[x][y].building = undefined;
+    } else if (!tile.building) {
+      // place building at that location
+      city.data[x][y].building = buildingFactory[activeToolId]();
+    }
+    city.update();
+    this.update(city);
   }
 
-  onMouseUp(state) {
-    console.log("Mouse up for scene");
+  onMouseDown(state) {
+    console.log("Scene controller mouse down");
+    // really, do nothing.
+    // this.mouseDownObject = this.getObjectUnderMouse(state);
+  }
+
+  onMouseUp(state, activeToolId, city) {
+    console.log("Scene controller mouse up", state);
 
     const mouseObject = this.getObjectUnderMouse(state);
-    
-    if (mouseObject) {
-      this.selectedObject = mouseObject;
+
+    if (state.isShift) {
+      // brushstroke mouse up: do nothing.
+    } else if (state.isLeftMouseDown) {
+      // normal click mouse up: take action.
+      this.onObjectSelected(activeToolId, mouseObject, city);
     }
-
-    // if (intersections.length > 0) {
-    //   this.selectedObject = intersections[0].object;
-    //   this.selectedObject.material.emissive.setHex(0x555555);
-
-    //   // console.log("User data", this.selectedObject.userData)
-    //   // console.log(`Tile ${this.selectedObject.userData.x}, ${this.selectedObject.userData.y}`);
-
-    //   if (this.onObjectSelected) {
-    //     this.onObjectSelected(this.selectedObject);
-    //   }
-    //   else {
-    //     console.log("No object selected callback");
-    //   }
-    // } else {
-    //   console.log("No intersection");
-    // }
+    // this.lastAffectedObject = undefined;
   }
 
-  onMouseMove(state) {
-    console.log("On mouse move for scene", state);
+  onMouseMove(state, activeToolId, city) {
+    console.log("Scene controller mouse move", state);
     if (state.moved()) {
-      console.log("Mouse move, currently", state.cur);
+
       const mouseObject = this.getObjectUnderMouse(state);
-      
-      if (this.onObjectSelected) {
-        this.onObjectSelected(mouseObject);
+
+      if (state.isShift) {
+        // brushstroke mouse move: take action.
+        this.onObjectSelected(activeToolId, mouseObject, city);
+      } else {
+        console.log("what")
+        // do nothing
       }
-
-      // if (this.mouseDownObject) {
-
-      // }
+    }
+    else {
+      console.log("No movement");
     }
   }
 
